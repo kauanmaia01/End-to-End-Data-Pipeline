@@ -6,7 +6,9 @@ import pandas as pd
 from typing import List
 import time
 
-from utils.log_message import run_log_message
+from utils.log_message import get_logger
+
+logger = get_logger(__name__)
 
 
 def search_tickers_brapi() -> List:
@@ -31,7 +33,7 @@ def data_extraction_yahoo_finance(list_tickers: List) -> pd.DataFrame:
 
     for chunk in chunk_list(list_tickers, 50):
         try:
-            run_log_message.info(f'[Ingestão de Dados Yahoo Finance] Baixando chunk com {len(chunk)} tickers')
+            logger.info(f'[Ingestão de Dados Yahoo Finance] Baixando chunk com {len(chunk)} tickers')
 
             data = yf.download(
                 tickers=chunk,
@@ -56,10 +58,10 @@ def data_extraction_yahoo_finance(list_tickers: List) -> pd.DataFrame:
                     batch.append(df)
 
                 except Exception as e:
-                    run_log_message.warning(f'[Ingestão de Dados Yahoo Finance] Erro no ticker {ticker}: {e}')
+                    logger.warning(f'[Ingestão de Dados Yahoo Finance] Erro no ticker {ticker}: {e}')
 
         except Exception as e:
-            run_log_message.error(f'[Ingestão de Dados Yahoo Finance] Erro no chunk: {e}')
+            logger.error(f'[Ingestão de Dados Yahoo Finance] Erro no chunk: {e}')
 
     if not batch:
         return pd.DataFrame()
@@ -67,7 +69,7 @@ def data_extraction_yahoo_finance(list_tickers: List) -> pd.DataFrame:
     return pd.concat(batch, ignore_index=True)
 
 
-def run_extration_yahoo_finance():
+def run_extration_yahoo_finance() -> pd.DataFrame:
     list_tickers = search_tickers_brapi()
     
     process_start = time.strftime('%H:%M:%S')
@@ -75,11 +77,11 @@ def run_extration_yahoo_finance():
     df = data_extraction_yahoo_finance(list_tickers)
 
     if df.empty:
-        run_log_message.warning('[Ingestão de Dados Yahoo Finance] DataFrame vazio. Nada foi salvo.')
+        logger.warning('[Ingestão de Dados Yahoo Finance] DataFrame vazio.')
         return df
 
     process_end = time.strftime('%H:%M:%S')
 
-    run_log_message.info(f'[Ingestão de Dados Yahoo Finance] Inicio: {process_start} | Fim: {process_end}')
+    logger.info(f'[Ingestão de Dados Yahoo Finance] Inicio: {process_start} | Fim: {process_end}')
 
     return df

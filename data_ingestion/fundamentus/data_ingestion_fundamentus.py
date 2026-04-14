@@ -50,6 +50,7 @@ def html_table_extract_fundamentus(html_content: str) -> pd.DataFrame:
     
     except Exception as e:
         logger.error(f'[Ingestão de Dados Fundamentus] Ao extrair os dados: {e}')
+        raise
 
 
 def run_extration_fundamentus() -> pd.DataFrame:
